@@ -2,21 +2,79 @@
 #include <string>
 using namespace std;
 
+class Transmission{
+    private:
+        int Gear;
+        string Type;
+        bool automatic;
+        bool paddleShift;
+        string PowerType;
+    public:
+        Transmission(){};
+        Transmission(int G, string T, bool A, bool P, string PW): Gear(G), Type(T), automatic(A), paddleShift(P), PowerType(PW){}
+        void Display(){
+            cout<< "Transmission Type: "<< Type<< endl;
+            cout<< "Gears: "<< Gear<< endl;
+            cout<< "Automatic: "<< (automatic ? "Yes" : "No")<< endl;
+            cout<< "Paddle Shift: "<< (paddleShift ? "Yes" : "No")<< endl;
+            cout<< "Power: "<< PowerType<< endl;
+        }
+
+        int getGear(){return Gear;}
+        string getType(){return Type;}
+        bool getAutomatic(){return automatic;}
+        bool getPaddleShift(){return paddleShift;}
+        string getPowerType(){return PowerType;}
+
+        void service(){
+            cout<< "Transmission Serviced"<< endl;
+        }
+        void toggleMode(){
+            automatic = !automatic;
+            Type = automatic ? "Automatic" : "Manual";
+        }
+        void gearChange(int G){
+            if(G > 0 && G <= Gear){
+                cout<< "Shifted to gear "<< G<< endl;
+            }else{
+                cout<< "Invalid gear"<< endl;
+            }
+        }
+        void paddleShift(int G){
+            if(paddleShift){
+                gearChange(G);
+            }else{
+                cout<< "Paddle shift not available"<< endl;
+            }
+        }
+};
+
 class Engine{
     private:
         int CC;
         string FuelType;
-        string TransmissionType;
         int Cylinder;
         int Turbo;
     public:
         Engine(){};
-        Engine(int CCIn, string FuelIn, string TransmissionIn, int CylinderIn, int TurboIn){
+        Engine(int CCIn, string FuelIn, int CylinderIn, int TurboIn){
             CC = CCIn;
             FuelType = FuelIn;
-            TransmissionType = TransmissionIn;
             Cylinder = CylinderIn;
             Turbo = TurboIn;
+        }
+        void Display(){
+            cout<< "Engine CC: "<< CC<< endl;
+            cout<< "Fuel Type: "<< FuelType<< endl;
+            cout<< "Cylinder: "<< Cylinder<< endl;
+            cout<< "Turbo: "<< (Turbo ? "Yes" : "No")<< endl;
+        }
+        int getCC(){return CC;}
+        string getFuelType(){return FuelType;}
+        int getCylinder(){return Cylinder;}
+        int getTurbo(){return Turbo;}
+        void service(){
+            cout<< "Engine Serviced"<< endl;
         }
 };
 class Car{
@@ -27,64 +85,36 @@ private:
     string Name;
     Engine engine;
     int Mileage;
-    string Color;
+    Transmission transmission;
     int Price;
     int RegisterationYear;
 public:
     Car(){};
-    Car(string CompanyIn, string NameIn, int MileageIn, string ColorIn, int PriceIn, int RegisterationIn, int CCIn, string FuelIn, string TransmissionIn, int CylinderIn, int TurboIn): engine(CCIn, FuelIn, TransmissionIn, CylinderIn, TurboIn), Id(CarCount++){
-        Company = CompanyIn;
-        Name = NameIn;
-        Mileage = MileageIn;
-        Color = ColorIn;
-        Price = PriceIn;
-        RegisterationYear = RegisterationIn;
+    Car(string CIn, string NIn, int MIn, int PIn, int RIn, int CC, string FIn, int CylinderIn, int TurboIn, int G, string T, bool A, bool P, string PW): engine(CC, FIn, CylinderIn, TurboIn), transmission(G, T, A, P, PW), Id(CarCount++){
+        Company = CIn;
+        Name = NIn;
+        Mileage = MIn;
+        Price = PIn;
+        RegisterationYear = RIn;
     }
-    string returnCompany(){
-        return Company;
-    }
-    string returnName(){
-        return Name;
-    }
-    int returnMileage(){
-        return Mileage;
-    }
-    string returnColor(){
-        return Color;
-    }
-    int returnRegisterationYear(){
-        return RegisterationYear;
-    }
-    int returnPrice(){
-        return Price;
-    }
-    int returnID(){
-        return Id;
-    }
-    void setCompany(string input){
-        Company = input;
-    }
-    void setName(string input){
-        Name = input;
-    }
-    void setMileage(int input){
-        Mileage = input;
-    }
-    void setColor(string input){
-        Color = input;
-    }
-    void setRegisterationYear(int input){
-        RegisterationYear = input;
-    }
-    void setPrice(int input){
-        Price = input;
-    }
+    string returnCompany(){return Company;}
+    string returnName(){return Name;}
+    int returnMileage(){return Mileage;}
+    int returnRegisterationYear(){return RegisterationYear;}
+    int returnPrice(){return Price;}
+    int returnID(){return Id;}
+    
+    void setCompany(string input){Company = input;}
+    void setName(string input){Name = input;}
+    void setMileage(int input){Mileage = input;}
+    void setRegisterationYear(int input){RegisterationYear = input;}
+    void setPrice(int input){Price = input;}
+
     void Display(){
         cout<< "Car ID: "<< Id<< endl;
         cout<< "Company: "<< Company<< endl;
         cout<< "Name: "<< Name<<endl;
         cout<< "Mileage: "<< Mileage<< endl;
-        cout<< "Color: "<< Color<< endl;
         cout<< "Registered In Year: "<< RegisterationYear<< endl;
         cout<< "Price: "<< Price<< endl;
     }
@@ -102,7 +132,7 @@ class Seller {
             Name = NameIn;
             SellingCount = 0;
         }
-        void addCar(Car *&ApprovalList,int *ApprovalListIndex, int *size, string CompanyIn, string NameIn, int MileageIn, string ColorIn, int PriceIn, int RegisterationIn, int CCIn, string FuelIn, string TransmissionIn, int CylinderIn, int TurboIn){
+        void addCar(Car *&ApprovalList,int *ApprovalListIndex, int *size,string CIn, string NIn, int MIn, int PIn, int RIn, int CC, string FIn, int CylinderIn, int TurboIn, int G, string T, bool A, bool P, string PW){
             if(*ApprovalListIndex > *size){
                 Car *temp = new Car[*size * 2];
                 for(int i = 0; i < *size; i++){
@@ -110,7 +140,7 @@ class Seller {
                 }
                 delete[] ApprovalList;
                 ApprovalList = temp;
-                ApprovalList[*ApprovalListIndex] = Car(CompanyIn, NameIn, MileageIn, ColorIn, PriceIn, RegisterationIn, CCIn, FuelIn, TransmissionIn, CylinderIn, TurboIn);
+                ApprovalList[*ApprovalListIndex] = Car(CIn, NIn, MIn, PIn, RIn, CC, FIn, CylinderIn, TurboIn, G, T, A, P, PW);
                 *ApprovalListIndex++;
             }
         }
@@ -191,4 +221,5 @@ class Admin{
             Approved = A;
             Rejected = RJ;
         }
+        void approveCar(Car*& A)
 };
