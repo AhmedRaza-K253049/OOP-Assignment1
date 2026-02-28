@@ -2,6 +2,27 @@
 #include <string>
 using namespace std;
 
+class Message{
+    private:
+        string Sender;
+        string Reciever;
+        string Data;
+        static int MessageID;
+        bool Seen;
+    public:
+        Message(string s, string r, string d){
+            Sender = s;
+            Reciever = r;
+            Data = d;
+            Seen = false;
+            MessageID++;
+        }
+        void sendMessage(){
+            cout<< "Message '"<< Data<< "' to "<< Reciever;
+        }
+        void Seen(){Seen = true;}
+};
+
 class Transmission{
     private:
         int Gear;
@@ -117,23 +138,53 @@ public:
         cout<< "Mileage: "<< Mileage<< endl;
         cout<< "Registered In Year: "<< RegisterationYear<< endl;
         cout<< "Price: "<< Price<< endl;
+        engine.Display();
+        transmission.Display();
     }
 };
 
-class Seller {
+class CarList
+{
     private:
+        static int ListID;
+        Car Cars[50];
+};
+
+class Browser{
+    private:
+        static int UserCount;
+        const int UserID;
+        string Name;
+        string Number;
+        string Email;
+    public:
+        Browser(string n, string no, string e): Name(n), Number(no), Email(e), UserID(UserCount++){}
+        void displayInfo(){
+            cout<< "UserID: "<< UserID<< endl;
+            cout<< "Name: "<< Name<< endl;
+            cout<< "Number: "<< Number<< endl;
+            cout<< "Email : "<< Email<< endl;
+        }
+    
+};
+
+class Seller{
+    private:
+        static int UserCount;
+        const int UserID;
         string Name;
         const int Number;
         const string Email;
         Car Selling[5];
         int SellingCount;
     public:
-        Seller(string NameIn, string EmailIn, string PasswordIn, int NumberIn): Email(EmailIn), Number(NumberIn){
+
+        Seller(string NameIn, string EmailIn, string PasswordIn, int NumberIn): Email(EmailIn), Number(NumberIn), UserID(UserCount++){
             Name = NameIn;
             SellingCount = 0;
         }
         void addCar(Car *&ApprovalList,int *ApprovalListIndex, int *size,string CIn, string NIn, int MIn, int PIn, int RIn, int CC, string FIn, int CylinderIn, int TurboIn, int G, string T, bool A, bool P, string PW){
-            if(*ApprovalListIndex > *size){
+            if(*ApprovalListIndex >= *size){
                 Car *temp = new Car[*size * 2];
                 for(int i = 0; i < *size; i++){
                     temp[i] = ApprovalList[i]; 
@@ -141,7 +192,7 @@ class Seller {
                 delete[] ApprovalList;
                 ApprovalList = temp;
                 ApprovalList[*ApprovalListIndex] = Car(CIn, NIn, MIn, PIn, RIn, CC, FIn, CylinderIn, TurboIn, G, T, A, P, PW);
-                *ApprovalListIndex++;
+                (*ApprovalListIndex)++;
             }
         }
         void removeCar(Car *&ApprovalList,int *ApprovalListIndex, int size, int IdIn){
@@ -165,6 +216,8 @@ class Seller {
 };
 class Buyer{
    private:
+        static int UserCount;
+        const int UserID;
         string Name;
         const string Email;
         const int Number;
@@ -172,7 +225,7 @@ class Buyer{
         int FavouriteMax;
         int FavouriteCount;
     public:
-        Buyer(string NameIn, string EmailIn, string PasswordIn, int NumberIn): Email(EmailIn), Number(NumberIn){
+        Buyer(string NameIn, string EmailIn, string PasswordIn, int NumberIn): Email(EmailIn), Number(NumberIn), UserID(UserCount++){
             Name = NameIn;
             FavouriteCount = 0;
             FavouriteMax = 5;
@@ -221,5 +274,50 @@ class Admin{
             Approved = A;
             Rejected = RJ;
         }
-        void approveCar(Car*& A)
+        void Displa(){
+            cout<< "Name: "<< Name<< endl;
+            cout<< "Email: "<< Email<< endl;
+            cout<< "Role: "<< Role<< endl;
+            cout<< "Approved Cars: "<< Approved<< endl;
+            cout<< "Rejected Cars: "<< Rejected<< endl;
+        }
+        void approveCar(Car *ApprovalList, int *ApprovalListIndex, Car *&Database, int *DatabaseIndex, int *DatabaseSize){
+            int temp;
+            for(int i = 0; i < *ApprovalListIndex; i++){
+                ApprovalList[i].Display();
+            }
+            cout<< "What Car Do You Want To Approve: "; cin>> temp;
+            if(*DatabaseIndex > *DatabaseSize){
+                Car *tempDatabase = new Car[*DatabaseSize * 2];
+                for(int i = 0; i < *DatabaseIndex; i++){
+                    tempDatabase[i] = Database[i];
+                }
+                delete[] Database;
+                Database = tempDatabase;
+                (*DatabaseSize) *= 2;
+            }
+            for(int i = 0; i < *DatabaseIndex; i++){
+                if(i == temp){
+                    Database[*DatabaseIndex] = ApprovalList[i];
+                    for(int j = i; j < *ApprovalListIndex; j++){
+                        ApprovalList[j] = ApprovalList[j + 1];
+                    }
+                    (*DatabaseIndex)++;
+                    (*ApprovalListIndex)--;
+                }
+            }
+            Approved++;
+        }
+        void rejectCar(Car *ApprovalList, int *ApprovalListIndex, int ApprovalListSize){
+            int temp;
+            for(int i = 0; i < *ApprovalListIndex; i++){
+                ApprovalList[i].Display();
+            }
+            cout<< "What Car Do You Want To Reject: "; cin>> temp;
+            for(int i = temp; i < ApprovalListSize - 1; i++){
+                ApprovalList[i + 1] = ApprovalList[i];
+            }
+            (*ApprovalListIndex)--;
+            Rejected++;
+        }
 };
