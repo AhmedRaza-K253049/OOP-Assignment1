@@ -111,12 +111,12 @@ public:
         Price = PriceIn;
         RegisterationYear = RegistrationIn;
     }
-    string returnCompany(){return Company;}
-    string returnName(){return Name;}
-    int returnMileage(){return Mileage;}
-    int returnRegisterationYear(){return RegisterationYear;}
-    int returnPrice(){return Price;}
-    int returnID(){return Id;}
+    string getCompany(){return Company;}
+    string getName(){return Name;}
+    int getMileage(){return Mileage;}
+    int getRegisterationYear(){return RegisterationYear;}
+    int getPrice(){return Price;}
+    int getID(){return Id;}
     
     void setCompany(string input){Company = input;}
     void setName(string input){Name = input;}
@@ -144,8 +144,7 @@ class Message{
         static int MessageID;
         bool Seen;
     public:
-        Message(string s, string r, string d){
-            Sender = s;
+        Message(string r, string d){
             Reciever = r;
             Data = d;
             Seen = false;
@@ -171,6 +170,9 @@ class Browser{
             cout<< "Name: "<< Name<< endl;
             cout<< "Number: "<< Number<< endl;
             cout<< "Email : "<< Email<< endl;
+        }
+        static int getUserCount(){
+            return UserCount;
         }  
 };
 
@@ -194,6 +196,48 @@ class Seller{
             cout<< "Number: "<< Number<< endl;
             cout<< "Email : "<< Email<< endl;
         }
+        void addCar(CarList *&ApprovalList,int *ApprovalListIndex, int *size){
+            string CompanyNameIn, NameIn, FuelIn, NameIn, PowerTypeIn, EmailIn, TypeIn;
+            int MileageIn, PriceIn, RegistrationYearIn, CC, NumberIn, CylinderIn, TurboIn, GearIn, PaddleShiftIn, AutomaticIn;
+            cout<< "Enter Car Company: "; cin>> CompanyNameIn;
+            cout<< "Enter Car Name: "; cin>> NameIn;
+            cout<< "Enter Car Mileage: "; cin>> MileageIn;
+            cout<< "Enter Car Price: "; cin>> PriceIn;
+            cout<< "Enter Car Registration Year: "; cin>> RegistrationYearIn;
+            cout<< "Enter Car CC: "; cin>> CC;
+            cout<< "Enter Car Fuel Type (Petrol Diesel etc): "; cin>> FuelIn;
+            cout<< "How many Cylinder does the car have: "; cin>> CylinderIn;
+            cout<< "Does the car have turbo ? Enter 1 if yes "; cin>> TurboIn;
+            cout<< "Enter number of gears the Car has: "; cin>> GearIn;
+            cout<< "Is the Car Manual or Automatic ? Enter 1 if yes "; cin>> AutomaticIn;
+            cout<< "Does it have Pedal Shifters ? : "; cin>> PaddleShiftIn;
+            cout<< "What Power Type is the Car (PWD / FWD / AWD): "; cin>> PowerTypeIn;
+            (AutomaticIn) ? (TypeIn = "Manual") : (TypeIn = "Automatic"); 
+            if(*ApprovalListIndex >= *size){
+                CarList *temp = new CarList[*size * 2];
+                for(int i = 0; i < *size; i++){
+                    temp[i] = ApprovalList[i]; 
+                }
+                delete[] ApprovalList;
+                ApprovalList = temp;
+                ApprovalList[*ApprovalListIndex].this` = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
+                (*ApprovalListIndex)++;
+                (*size) *= 2;
+            }else{
+                ApprovalList[*ApprovalListIndex].thisCar = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
+                (*ApprovalListIndex)++;
+            }
+        }
+        void removeCar(Car ApprovalList[],int *ApprovalListIndex, int size, int IdIn){
+            for(int i = 0; i < *ApprovalListIndex; i++){
+                if(ApprovalList[i].getID() == IdIn){
+                    for(int j = i; j < *ApprovalListIndex - 1; j++){
+                        ApprovalList[j] = ApprovalList[j + 1];
+                    }
+                    (*ApprovalListIndex)--;;
+                }
+            }
+        }
 };
 
 class Buyer{
@@ -207,7 +251,7 @@ class Buyer{
         int FavouriteCount;
     public:
         Buyer(){}
-        Buyer(string NameIn, string EmailIn, string PasswordIn, int NumberIn){
+        Buyer(string NameIn, string EmailIn, int NumberIn){
             Number = NumberIn;  
             UserID = Browser:: UserCount++;
             Email = EmailIn;
@@ -215,6 +259,11 @@ class Buyer{
             FavouriteCount = 0;
             FavouriteMax = 5;
             Favourite = new Car*[5];
+        }
+        void displayFavourite(){
+            for(int i = 0; i < FavouriteCount; i++){
+                Favourite[i]->Display();
+            }
         }
         void addFavourite(Car *obj){
             if(FavouriteCount < FavouriteMax){
@@ -235,13 +284,22 @@ class Buyer{
         }
         void removeFavourite(int IdIn){
             for(int i = 0; i < FavouriteCount; i++){
-                if(Favourite[i]->returnID() == IdIn){
+                if(Favourite[i]->getID() == IdIn){
                     for(int j = i; j < FavouriteCount; j++){
                         Favourite[j] = Favourite[j + 1];
                     }
                 FavouriteCount--;
                 }
             }
+        }
+        void sendMessage(){
+            string sendTo;
+            string messageToSend;
+            cout<< "What Message do you want to send and to who ?";
+            cin>> messageToSend;
+            cin>> sendTo;
+            Message msg(sendTo, messageToSend);
+            msg.sendMessage();
         }
 };
 
@@ -316,8 +374,8 @@ class CarList{
         Seller thisSeller;
     public:
         CarList(){}
-        CarList(string CompanyNameIn, string NameIn, int MileageIn, int PriceIn, int RegistrationYearIn, int CC, string FuelIn, int CylinderIn, int TurboIn, int GearIn, int AutomaticIn, int PaddleShiftIn, string PowerTypeIn, string SellerNameIn, string EmailIn, int NumberIn)
-        :thisCar(CompanyNameIn, NameIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn), thisSeller(SellerNameIn, EmailIn, NumberIn), ListID(ListCount++){}
+        CarList(string CompanyNameIn, string NameIn, string TypeIn, int MileageIn, int PriceIn, int RegistrationYearIn, int CC, string FuelIn, int CylinderIn, int TurboIn, int GearIn, int AutomaticIn, int PaddleShiftIn, string PowerTypeIn, string SellerNameIn, string EmailIn, int NumberIn)
+        :thisCar(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn), ListID(ListCount++){}
         
         int getListID(){return ListID;}
         static int getList(){return ListCount;}
@@ -329,66 +387,152 @@ class CarList{
             thisSeller.Display();
         }
 };
+
 int CarList:: ListCount = 0;
 int Message:: MessageID = 0;
 int Browser:: UserCount = 0;
 
-void addCar(Car *&ApprovalList,int *ApprovalListIndex, int *size){
-    string CompanyNameIn, NameIn, FuelIn, NameIn, PowerTypeIn, EmailIn, TypeIn;
-    int MileageIn, PriceIn, RegistrationYearIn, CC, NumberIn, CylinderIn, TurboIn, GearIn, PaddleShiftIn, AutomaticIn;
-    cout<< "Enter Car Company: "; cin>> CompanyNameIn;
-    cout<< "Enter Car Name: "; cin>> NameIn;
-    cout<< "Enter Car Mileage: "; cin>> MileageIn;
-    cout<< "Enter Car Price: "; cin>> PriceIn;
-    cout<< "Enter Car Registration Year: "; cin>> RegistrationYearIn;
-    cout<< "Enter Car CC: "; cin>> CC;
-    cout<< "Enter Car Fuel Type (Petrol Diesel etc): "; cin>> FuelIn;
-    cout<< "How many Cylinder does the car have: "; cin>> CylinderIn;
-    cout<< "Does the car have turbo ? Enter 1 if yes "; cin>> TurboIn;
-    cout<< "Enter number of gears the Car has: "; cin>> GearIn;
-    cout<< "Is the Car Manual or Automatic ? Enter 1 if yes "; cin>> AutomaticIn;
-    cout<< "Does it have Pedal Shifters ? : "; cin>> PaddleShiftIn;
-    cout<< "What Power Type is the Car (PWD / FWD / AWD): "; cin>> PowerTypeIn;
-    (AutomaticIn) ? (TypeIn = "Manual") : (TypeIn = "Automatic"); 
-    if(*ApprovalListIndex >= *size){
-        Car *temp = new Car[*size * 2];
-        for(int i = 0; i < *size; i++){
-            temp[i] = ApprovalList[i]; 
+void searchByCompany(CarList array[], int index, string company){
+    for(int i = 0; i < index; i++){
+        if(array[i].getCar().getCompany() == company){
+            array[i].display();
         }
-        delete[] ApprovalList;
-        ApprovalList = temp;
-        ApprovalList[*ApprovalListIndex] = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
-        (*ApprovalListIndex)++;
-        (*size) *= 2;
-    }else{
-        ApprovalList[*ApprovalListIndex] = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
-        (*ApprovalListIndex)++;
     }
 }
-void removeCar(Car *&ApprovalList,int *ApprovalListIndex, int size, int IdIn){
-    for(int i = 0; i < *ApprovalListIndex; i++){
-        if(ApprovalList[i].returnID() == IdIn){
-            for(int j = i; j < *ApprovalListIndex - 1; j++){
-                ApprovalList[j] = ApprovalList[j + 1];
-            }
-            (*ApprovalListIndex)--;;
+void searchByName(CarList array[], int index, string name){
+    for(int i = 0; i < index; i++){
+        if(array[i].getCar().getName() == name){
+            array[i].display();
+        }
+    }
+}
+void searchByMileage(CarList array[], int index, int mileage){
+    for(int i = 0; i < index; i++){
+        if(array[i].getCar().getMileage() <= mileage){
+            array[i].display();
+        }
+    }
+}
+void searchByPrice(CarList array[], int index, int price){
+    for(int i = 0; i < index; i++){
+        if(array[i].getCar().getPrice() <= price){
+            array[i].display();
+        }
+    }
+}
+void searchByRegistrationYear(CarList array[], int index, int year){
+    for(int i = 0; i < index; i++){
+        if(array[i].getCar().getRegisterationYear() <= year){
+            array[i].display();
         }
     }
 }
 
 int main(){
+    string searchCompanyName, searchCarName, name, email, Company, Name, messageData, messageSendTo;
+    int searchRegistrationYear, number, choice, favouriteChoice, searchPrice, searchMileage, Mileage, RegisterationYear, Price;
     CarList *Database = new CarList[50];
     CarList *ApprovalList = new CarList[10];
     Admin *AdminList = new Admin[10];
     Buyer *BuyerList = new Buyer[10];
     Seller *SellerList = new Seller[10];
-    int DatabaseIndex = 0, ApprovalListIndex = 0, DatabaseSize = 50, ApprovalListSize = 10;
+    int DatabaseIndex = 0, ApprovalListIndex = 0, DatabaseSize = 50, ApprovalListSize = 10, SellerIndex = 0, BuyerIndex = 0, SellerSize = 10, BuyerSize = 10;
     int choice, repeat;
-    cout<< "Do you want to BUY / SELL / Browse or are you Admin ? Enter 1,2,3,4 for each respectively\n";
-    cin>> choice;
     while(!repeat)
+        cout<< "Do you want to BUY / SELL / Browse or are you Admin ? Enter 1,2,3,4 for each respectively\n";
+        cin>> choice;
         switch(choice){
             case 1:
-
+                cout<< "Enter your Name, Number and Email"<< endl;
+                cin>> name;
+                cin>> number;
+                cin>> email;
+                if(BuyerIndex > BuyerSize){
+                    Buyer *temp = new Buyer[BuyerSize * 2];
+                    for(int i = 0; i < BuyerSize; i++){
+                        temp[i] = BuyerList[i];
+                    }
+                    delete[] BuyerList;
+                    BuyerList = temp;
+                    BuyerSize *= 2;
+                }
+                BuyerList[BuyerIndex] = Buyer(name, email, number);
+                for(int i = 0; i < DatabaseIndex; i++){
+                    Database->display();
+                }
+                cout<< "Do you want to add a Car to your favourite list or Search Cars by Company Name, Car Name, Mileage, Price or Registration year or Send Message to a Seller ? Enter 1, 2, 3 for each"<< endl;
+                cin>> choice;
+                switch(choice){
+                    case 1:
+                        cout<< "Enter ListID of the Car you want to favourite ?"<< endl;
+                        cin>> favouriteChoice;
+                        BuyerList[BuyerIndex].addFavourite(&Database[favouriteChoice].getCar());
+                        break;
+                    case 2:
+                        int searchChoice;
+                        cout<< "Do you want Search Cars by Company Name, Car Name, Mileage, Price or Registration year ? Enter 1, 2, 3, 4 5 for each respectively"<< endl;
+                        cin>> searchChoice;
+                        switch(searchChoice){
+                            case 1:
+                                cout<< "Enter Car's Company Name: "; cin>> searchCompanyName;
+                                searchByCompany(Database, DatabaseIndex, searchCompanyName);
+                                cout<< "Enter ListID Of The Car You Want To Favourite ?"<< endl;
+                                cin>> favouriteChoice;
+                                BuyerList[BuyerIndex].addFavourite(&Database[favouriteChoice].getCar());
+                                break;
+                            case 2:
+                                cout<< "Enter Car's Name: "; cin>> searchCarName;
+                                searchByName(Database, DatabaseIndex, searchCarName);
+                                cout<< "Enter ListID Of The Car You Want To Favourite ?"<< endl;
+                                cin>> favouriteChoice;
+                                BuyerList[BuyerIndex].addFavourite(&Database[favouriteChoice].getCar());
+                                break;
+                            case 3:
+                                cout<< "Enter Mileage You Want To See Cars With Less Than: "; cin>> searchMileage;
+                                searchByMileage(Database, DatabaseIndex, searchMileage);
+                                cout<< "Enter ListID Of The Car You Want To Favourite ?"<< endl;
+                                cin>> favouriteChoice;
+                                BuyerList[BuyerIndex].addFavourite(&Database[favouriteChoice].getCar());
+                                break;
+                            case 4:
+                                cout<< "Enter Price You Want To See Cars With Less Than: "; cin>> searchPrice;
+                                searchByPrice(Database, DatabaseIndex, searchPrice);
+                                cout<< "Enter ListID Of The Car You Want To Favourite ?"<< endl;
+                                cin>> favouriteChoice;
+                                BuyerList[BuyerIndex].addFavourite(&Database[favouriteChoice].getCar());
+                                break;
+                            case 5:
+                                cout<< "Enter Car Company Name: "; cin>> searchRegistrationYear;
+                                searchByRegistrationYear(Database, DatabaseIndex, searchRegistrationYear);
+                                cout<< "Enter ListID of the Car you want to favourite ?"<< endl;
+                                cin>> favouriteChoice;
+                                BuyerList[BuyerIndex].addFavourite(&Database[favouriteChoice].getCar());
+                                break;
+                        }
+                        break;
+                    case 3:
+                        cout<< "Who Do You Want To Send A Message To And What Message ?"<< endl;
+                        cin>> messageSendTo;
+                        cin>> messageData;
+                        Message msg(messageSendTo, messageData);
+                        msg.sendMessage();
+                        break;
+                }
+            case 2:
+                cout<< "Enter your Name, Number and Email"<< endl;
+                cin>> name;
+                cin>> number;
+                cin>> email;
+                if(SellerIndex > SellerSize){
+                    Seller *temp = new Seller[SellerSize * 2];
+                    for(int i = 0; i < SellerSize; i++){
+                        temp[i] = SellerList[i];
+                    }
+                    delete[] SellerList;
+                    SellerList = temp;
+                    SellerSize *= 2;
+                }
+                SellerList[SellerIndex] = Seller(name, email, number);
+                SellerList[SellerIndex].addCar(ApprovalList, &ApprovalListIndex, &ApprovalListSize);
         }
 }
