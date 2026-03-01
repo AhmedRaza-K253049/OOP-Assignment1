@@ -50,24 +50,27 @@ class Transmission{
 class Engine{
     private:
         int CC;
+        int HorsePower;
         string FuelType;
         int Cylinder;
         bool Turbo;
     public:
         Engine(){};
-        Engine(int CCIn, string FuelIn, int CylinderIn, int TurboIn){
-            CC = CCIn; FuelType = FuelIn; Cylinder = CylinderIn; Turbo = TurboIn;
+        Engine(int CCIn, string FuelIn, int CylinderIn, int TurboIn, int HorsePowerIn){
+            CC = CCIn; FuelType = FuelIn; Cylinder = CylinderIn; Turbo = TurboIn, HorsePower = HorsePowerIn;
         }
         void Display(){
             cout<< "Engine CC: "<< CC<< endl;
             cout<< "Fuel Type: "<< FuelType<< endl;
             cout<< "Cylinder: "<< Cylinder<< endl;
             cout<< "Turbo: "<< (Turbo ? "Yes" : "No")<< endl;
+            cout<< "Horse Power: "<< HorsePower<< endl;
         }
         int getCC(){return CC;}
         string getFuelType(){return FuelType;}
         int getCylinder(){return Cylinder;}
         int getTurbo(){return Turbo;}
+        int getHorsePower(){return HorsePower;}
         void service(){ cout<< "Engine Serviced"<< endl; }
 };
 
@@ -85,8 +88,8 @@ public:
     static int CarCount;
     Car(){};
     Car(string CompanyNameIn, string NameIn, string TypeIn, int MileageIn, int PriceIn, int RegistrationIn,
-        int CCIn, string FuelIn, int CylinderIn, int TurboIn, int GearIn, int AutomaticIn, int PaddleShiftIn, string PowerTypeIn)
-    :engine(CCIn, FuelIn, CylinderIn, TurboIn), transmission(GearIn, TypeIn, AutomaticIn, PaddleShiftIn, PowerTypeIn){
+        int CCIn, string FuelIn, int CylinderIn, int TurboIn,int HorsePowerIn, int GearIn, int AutomaticIn, int PaddleShiftIn, string PowerTypeIn)
+    :engine(CCIn, FuelIn, CylinderIn, TurboIn, HorsePowerIn), transmission(GearIn, TypeIn, AutomaticIn, PaddleShiftIn, PowerTypeIn){
         Id = CarCount++;
         Company = CompanyNameIn; Name = NameIn; Mileage = MileageIn;
         Price = PriceIn; RegisterationYear = RegistrationIn;
@@ -120,9 +123,10 @@ class Message{
         string Data;
         static int MessageID;
         bool Seen;
+        string CarName;
     public:
-        Message(string r, string d){
-            Reciever = r; Data = d; Seen = false; MessageID++;
+        Message(string r, string d, string c){
+            Reciever = r; Data = d; Seen = false; CarName = c; MessageID++;
         }
         void sendMessage(){ cout<< "Message '"<< Data<< "' to "<< Reciever<< endl; }
         void SeenToggle(){Seen = true;}
@@ -132,19 +136,21 @@ class CarList;
 class Seller{
     private:
         int UserID;
-        string Name;
+        string FirstName;
+        string LastName;
         string Number;
         string Email;
     public:
         static int UserCount;
         Seller(){}
-        Seller(string NameIn, string EmailIn, string NumberIn){
+        Seller(string FirstNameIn, string LastNameIn, string EmailIn, string NumberIn){
             UserID = UserCount++;
-            Email = EmailIn; Number = NumberIn; Name = NameIn;
+            Email = EmailIn; Number = NumberIn; FirstName = FirstNameIn; LastName = LastNameIn;
         }
         void Display(){
             cout<< "UserID: "<< UserID<< endl;
-            cout<< "Name: "<< Name<< endl;
+            cout<< "First Name: "<< FirstName<< endl;
+            cout<< "Last Name: "<< LastName<< endl;
             cout<< "Number: "<< Number<< endl;
             cout<< "Email : "<< Email<< endl;
         }
@@ -160,12 +166,12 @@ class CarList{
     public:
         CarList(){}
         CarList(string CompanyNameIn, string NameIn, string TypeIn, int MileageIn, int PriceIn,
-                int RegistrationYearIn, int CC, string FuelIn, int CylinderIn, int TurboIn,
+                int RegistrationYearIn, int CC, string FuelIn, int CylinderIn, int TurboIn, int HorsePowerIn,
                 int GearIn, int AutomaticIn, int PaddleShiftIn, string PowerTypeIn,
-                string SellerNameIn, string EmailIn, string NumberIn)
+                string SellerFirstNameIn, string SellerLastNameIn, string EmailIn, string NumberIn)
         : ListID(ListCount++),
-          thisCar(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn),
-          thisSeller(SellerNameIn, EmailIn, NumberIn){}
+          thisCar(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, HorsePowerIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn),
+          thisSeller(SellerFirstNameIn,SellerLastNameIn, EmailIn, NumberIn){}
 
         int getListID(){return ListID;}
         static int getList(){return ListCount;}
@@ -180,7 +186,7 @@ class CarList{
 
 void Seller::addCar(CarList *&ApprovalList, int *ApprovalListIndex, int *size){
     string CompanyNameIn, NameIn, FuelIn, PowerTypeIn, TypeIn;
-    int MileageIn, PriceIn, RegistrationYearIn, CC, CylinderIn, TurboIn, GearIn, PaddleShiftIn, AutomaticIn;
+    int MileageIn, PriceIn, RegistrationYearIn, CC, CylinderIn, TurboIn, GearIn, PaddleShiftIn, AutomaticIn, HorsePowerIn;
     cout<< "Enter Car Company: "; cin>> CompanyNameIn;
     cout<< "Enter Car Name: "; cin>> NameIn;
     cout<< "Enter Car Mileage: "; cin>> MileageIn;
@@ -190,6 +196,7 @@ void Seller::addCar(CarList *&ApprovalList, int *ApprovalListIndex, int *size){
     cout<< "Enter Car Fuel Type (Petrol Diesel etc): "; cin>> FuelIn;
     cout<< "How many Cylinders does the car have: "; cin>> CylinderIn;
     cout<< "Does the car have turbo ? Enter 1 if yes: "; cin>> TurboIn;
+    cout<< "How many Horse Power does the car have: "; cin>> HorsePowerIn;
     cout<< "Enter number of gears the Car has: "; cin>> GearIn;
     cout<< "Is the Car Automatic ? Enter 1 if yes: "; cin>> AutomaticIn;
     cout<< "Does it have Paddle Shifters ? Enter 1 if yes: "; cin>> PaddleShiftIn;
@@ -204,7 +211,7 @@ void Seller::addCar(CarList *&ApprovalList, int *ApprovalListIndex, int *size){
         ApprovalList = temp;
         *size *= 2;
     }
-    Car tempCar = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
+    Car tempCar = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, HorsePowerIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
     ApprovalList[*ApprovalListIndex].setCar(tempCar);
     (*ApprovalListIndex)++;
 }
@@ -254,10 +261,10 @@ class Buyer{
             }
         }
         void sendMessage(){
-            string sendTo, messageToSend;
-            cout<< "What Message do you want to send and to who ?";
-            cin>> messageToSend >> sendTo;
-            Message msg(sendTo, messageToSend);
+            string sendTo, messageToSend, carName;
+            cout<< "What Message do you want to send, about which car and to who ?";
+            cin>> messageToSend>> carName>> sendTo;
+            Message msg(sendTo, carName, messageToSend);
             msg.sendMessage();
         }
 };
@@ -346,7 +353,7 @@ void searchByRegistrationYear(CarList array[], int index, int year){
 }
 
 int main(){
-    string searchCompanyName, searchCarName, name, email, messageData, messageSendTo, number;
+    string searchCompanyName, searchCarName, firstName, lastName, email, messageData, messageSendTo, number, messageTopic, name;
     int searchRegistrationYear, favouriteChoice, searchPrice, searchMileage, approveChoice;
     CarList *Database = new CarList[50];
     CarList *ApprovalList = new CarList[10];
@@ -371,7 +378,10 @@ int main(){
                     BuyerSize *= 2;
                 }
                 BuyerList[BuyerIndex] = Buyer(name, email, number);
-                for(int i = 0; i < DatabaseIndex; i++) Database[i].display();
+                for(int i = 0; i < DatabaseIndex; i++) {
+                    Database[i].display();
+                    cout<< "\n";
+                }
                 cout<< "1: Add to Favourites  2: Search  3: Send Message"<< endl;
                 cin>> choice;
                 switch(choice){
@@ -419,10 +429,10 @@ int main(){
                         break;
                     }
                     case 3:
-                        cout<< "Enter recipient and message: ";
-                        cin>> messageSendTo >> messageData;
+                        cout<< "Enter recipient, topic and message: ";
+                        cin>> messageSendTo >> messageTopic>> messageData;
                         {
-                            Message msg(messageSendTo, messageData);
+                            Message msg(messageSendTo, messageTopic, messageData);
                             msg.sendMessage();
                         }
                         break;
@@ -430,8 +440,8 @@ int main(){
                 BuyerIndex++;
                 break;
             case 2:
-                cout<< "Enter your Name, Number and Email"<< endl;
-                cin>> name >> number >> email;
+                cout<< "Enter your First Name, Last Name, Number and Email"<< endl;
+                cin>> firstName>> lastName>> number >> email;
                 if(SellerIndex >= SellerSize){
                     Seller *temp = new Seller[SellerSize * 2];
                     for(int i = 0; i < SellerSize; i++) temp[i] = SellerList[i];
@@ -439,7 +449,7 @@ int main(){
                     SellerList = temp;
                     SellerSize *= 2;
                 }
-                SellerList[SellerIndex] = Seller(name, email, number);
+                SellerList[SellerIndex] = Seller(firstName, lastName, email, number);
                 SellerList[SellerIndex].addCar(ApprovalList, &ApprovalListIndex, &ApprovalListSize);
                 SellerIndex++;
                 break;
