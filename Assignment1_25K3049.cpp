@@ -102,9 +102,11 @@ private:
     int Price;
     int RegisterationYear;
 public:
+    static int CarCount;
     Car(){};
     Car(string CompanyNameIn, string NameIn, string TypeIn, int MileageIn, int PriceIn, int RegistrationIn, int CCIn, string FuelIn, int CylinderIn, int TurboIn, int GearIn, int AutomaticIn, int PaddleShiftIn, string PowerTypeIn)
     :engine(CCIn, FuelIn, CylinderIn, TurboIn), transmission(GearIn, TypeIn, AutomaticIn, PaddleShiftIn, PowerTypeIn){
+        Id = CarCount++;
         Company = CompanyNameIn;
         Name = NameIn;
         Mileage = MileageIn;
@@ -153,27 +155,7 @@ class Message{
         void sendMessage(){
             cout<< "Message '"<< Data<< "' to "<< Reciever;
         }
-        void Seen(){Seen = true;}
-};
-
-class Browser{
-    private:
-        const int UserID;
-        string Name;
-        string Number;
-        string Email;
-    public:
-        static int UserCount;
-        Browser(string n, string no, string e): Name(n), Number(no), Email(e), UserID(UserCount++){}
-        void displayInfo(){
-            cout<< "UserID: "<< UserID<< endl;
-            cout<< "Name: "<< Name<< endl;
-            cout<< "Number: "<< Number<< endl;
-            cout<< "Email : "<< Email<< endl;
-        }
-        static int getUserCount(){
-            return UserCount;
-        }  
+        void SeenToggle(){Seen = true;}
 };
 
 class Seller{
@@ -183,9 +165,10 @@ class Seller{
         int Number;
         string Email;
     public:
+        static int UserCount;
         Seller(){}
         Seller(string NameIn, string EmailIn, int NumberIn){
-            UserID = Browser:: UserCount++;
+            UserID = UserCount++;
             Email = EmailIn;
             Number = NumberIn;
             Name = NameIn;
@@ -197,7 +180,7 @@ class Seller{
             cout<< "Email : "<< Email<< endl;
         }
         void addCar(CarList *&ApprovalList,int *ApprovalListIndex, int *size){
-            string CompanyNameIn, NameIn, FuelIn, NameIn, PowerTypeIn, EmailIn, TypeIn;
+            string CompanyNameIn, NameIn, FuelIn, PowerTypeIn, EmailIn, TypeIn;
             int MileageIn, PriceIn, RegistrationYearIn, CC, NumberIn, CylinderIn, TurboIn, GearIn, PaddleShiftIn, AutomaticIn;
             cout<< "Enter Car Company: "; cin>> CompanyNameIn;
             cout<< "Enter Car Name: "; cin>> NameIn;
@@ -212,7 +195,7 @@ class Seller{
             cout<< "Is the Car Manual or Automatic ? Enter 1 if yes "; cin>> AutomaticIn;
             cout<< "Does it have Pedal Shifters ? : "; cin>> PaddleShiftIn;
             cout<< "What Power Type is the Car (PWD / FWD / AWD): "; cin>> PowerTypeIn;
-            (AutomaticIn) ? (TypeIn = "Manual") : (TypeIn = "Automatic"); 
+            (AutomaticIn) ? (TypeIn = "Automatic") : (TypeIn = "Manual"); 
             if(*ApprovalListIndex >= *size){
                 CarList *temp = new CarList[*size * 2];
                 for(int i = 0; i < *size; i++){
@@ -220,22 +203,14 @@ class Seller{
                 }
                 delete[] ApprovalList;
                 ApprovalList = temp;
-                ApprovalList[*ApprovalListIndex].this` = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
+                Car tempCar = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
+                ApprovalList[*ApprovalListIndex].setCar(tempCar);
                 (*ApprovalListIndex)++;
                 (*size) *= 2;
             }else{
-                ApprovalList[*ApprovalListIndex].thisCar = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
+                Car tempCar = Car(CompanyNameIn, NameIn, TypeIn, MileageIn, PriceIn, RegistrationYearIn, CC, FuelIn, CylinderIn, TurboIn, GearIn, AutomaticIn, PaddleShiftIn, PowerTypeIn);
+                ApprovalList[*ApprovalListIndex].setCar(tempCar);
                 (*ApprovalListIndex)++;
-            }
-        }
-        void removeCar(Car ApprovalList[],int *ApprovalListIndex, int size, int IdIn){
-            for(int i = 0; i < *ApprovalListIndex; i++){
-                if(ApprovalList[i].getID() == IdIn){
-                    for(int j = i; j < *ApprovalListIndex - 1; j++){
-                        ApprovalList[j] = ApprovalList[j + 1];
-                    }
-                    (*ApprovalListIndex)--;;
-                }
             }
         }
 };
@@ -253,7 +228,7 @@ class Buyer{
         Buyer(){}
         Buyer(string NameIn, string EmailIn, int NumberIn){
             Number = NumberIn;  
-            UserID = Browser:: UserCount++;
+            UserID = Seller:: UserCount++;
             Email = EmailIn;
             Name = NameIn;
             FavouriteCount = 0;
@@ -307,32 +282,37 @@ class Admin{
     private:
         string Name;
         string Email;
+        int Number;
         int UserID;
         int Approved;
         int Rejected;
     public:
         Admin(){}
-        Admin(string NameIn, string EmailIn){
-            UserID = Browser:: UserCount++;
+        Admin(string NameIn, string EmailIn, int NumberIn){
+            UserID = Seller:: UserCount++;
             Name = NameIn;
             Email = EmailIn;
+            Number = NumberIn;
             Approved = 0;
             Rejected = 0;
         }
+
+        string getName(){return Name;}
+        string getEmail(){return Email;}
+        int getNumber(){return Number;}
+
         void Display(){
             cout<< "Name: "<< Name<< endl;
             cout<< "Email: "<< Email<< endl;
             cout<< "Approved Cars: "<< Approved<< endl;
             cout<< "Rejected Cars: "<< Rejected<< endl;
         }
-        void approveCar(Car *ApprovalList, int *ApprovalListIndex, Car *&Database, int *DatabaseIndex, int *DatabaseSize){
+
+        void approveCar(CarList *ApprovalList, int *ApprovalListIndex, CarList *&Database, int *DatabaseIndex, int *DatabaseSize){
             int temp;
-            for(int i = 0; i < *ApprovalListIndex; i++){
-                ApprovalList[i].Display();
-            }
             cout<< "What Car Do You Want To Approve: "; cin>> temp;
             if(*DatabaseIndex > *DatabaseSize){
-                Car *tempDatabase = new Car[*DatabaseSize * 2];
+                CarList *tempDatabase = new CarList[*DatabaseSize * 2];
                 for(int i = 0; i < *DatabaseIndex; i++){
                     tempDatabase[i] = Database[i];
                 }
@@ -340,7 +320,7 @@ class Admin{
                 Database = tempDatabase;
                 (*DatabaseSize) *= 2;
             }
-            for(int i = 0; i < *DatabaseIndex; i++){
+            for(int i = 0; i < *ApprovalListIndex; i++){
                 if(i == temp){
                     Database[*DatabaseIndex] = ApprovalList[i];
                     for(int j = i; j < *ApprovalListIndex; j++){
@@ -352,14 +332,11 @@ class Admin{
             }
             Approved++;
         }
-        void rejectCar(Car *ApprovalList, int *ApprovalListIndex, int ApprovalListSize){
+        void rejectCar(CarList *ApprovalList, int *ApprovalListIndex, int ApprovalListSize){
             int temp;
-            for(int i = 0; i < *ApprovalListIndex; i++){
-                ApprovalList[i].Display();
-            }
             cout<< "What Car Do You Want To Reject: "; cin>> temp;
             for(int i = temp; i < ApprovalListSize - 1; i++){
-                ApprovalList[i + 1] = ApprovalList[i];
+                ApprovalList[i] = ApprovalList[i + 1];
             }
             (*ApprovalListIndex)--;
             Rejected++;
@@ -381,6 +358,9 @@ class CarList{
         static int getList(){return ListCount;}
         Car getCar(){return thisCar;}
         Seller getSeller(){return thisSeller;}
+        void setCar(Car obj){
+            thisCar = obj;
+        }
         void display(){
             cout<< "List ID: "<< ListID<< endl;
             thisCar.Display();
@@ -390,7 +370,8 @@ class CarList{
 
 int CarList:: ListCount = 0;
 int Message:: MessageID = 0;
-int Browser:: UserCount = 0;
+int Seller:: UserCount = 0;
+int Car:: CarCount = 0;
 
 void searchByCompany(CarList array[], int index, string company){
     for(int i = 0; i < index; i++){
@@ -422,7 +403,7 @@ void searchByPrice(CarList array[], int index, int price){
 }
 void searchByRegistrationYear(CarList array[], int index, int year){
     for(int i = 0; i < index; i++){
-        if(array[i].getCar().getRegisterationYear() <= year){
+        if(array[i].getCar().getRegisterationYear() >= year){
             array[i].display();
         }
     }
@@ -430,16 +411,16 @@ void searchByRegistrationYear(CarList array[], int index, int year){
 
 int main(){
     string searchCompanyName, searchCarName, name, email, Company, Name, messageData, messageSendTo;
-    int searchRegistrationYear, number, choice, favouriteChoice, searchPrice, searchMileage, Mileage, RegisterationYear, Price;
+    int searchRegistrationYear, number, choice, favouriteChoice, searchPrice, searchMileage, Mileage, RegisterationYear, Price, approveChoice;
     CarList *Database = new CarList[50];
     CarList *ApprovalList = new CarList[10];
     Admin *AdminList = new Admin[10];
     Buyer *BuyerList = new Buyer[10];
     Seller *SellerList = new Seller[10];
-    int DatabaseIndex = 0, ApprovalListIndex = 0, DatabaseSize = 50, ApprovalListSize = 10, SellerIndex = 0, BuyerIndex = 0, SellerSize = 10, BuyerSize = 10;
-    int choice, repeat;
-    while(!repeat)
-        cout<< "Do you want to BUY / SELL / Browse or are you Admin ? Enter 1,2,3,4 for each respectively\n";
+    int DatabaseIndex = 0, ApprovalListIndex = 0, DatabaseSize = 50, ApprovalListSize = 10, SellerIndex = 0, BuyerIndex = 0, AdminIndex = 0, SellerSize = 10, BuyerSize = 10, AdminSize = 10;
+    int choice, repeat = 1;
+    while(!repeat){
+        cout<< "Do you want to BUY / SELL / Admin ? Enter 1,2,3 for each respectively\n";
         cin>> choice;
         switch(choice){
             case 1:
@@ -502,7 +483,7 @@ int main(){
                                 BuyerList[BuyerIndex].addFavourite(&Database[favouriteChoice].getCar());
                                 break;
                             case 5:
-                                cout<< "Enter Car Company Name: "; cin>> searchRegistrationYear;
+                                cout<< "Enter Registration Year you want to see cars registered after: "; cin>> searchRegistrationYear;
                                 searchByRegistrationYear(Database, DatabaseIndex, searchRegistrationYear);
                                 cout<< "Enter ListID of the Car you want to favourite ?"<< endl;
                                 cin>> favouriteChoice;
@@ -518,6 +499,8 @@ int main(){
                         msg.sendMessage();
                         break;
                 }
+                BuyerIndex++;
+                break;
             case 2:
                 cout<< "Enter your Name, Number and Email"<< endl;
                 cin>> name;
@@ -534,5 +517,37 @@ int main(){
                 }
                 SellerList[SellerIndex] = Seller(name, email, number);
                 SellerList[SellerIndex].addCar(ApprovalList, &ApprovalListIndex, &ApprovalListSize);
+                SellerIndex++;      
+                break;
+            case 3:
+                cout<< "Enter your Name, Number and Email"<< endl;
+                cin>> name;
+                cin>> number;
+                cin>> email;
+                if(AdminIndex > AdminSize){
+                    Admin *temp = new Admin[AdminSize * 2];
+                    for(int i = 0; i < AdminSize; i++){
+                        temp[i] = AdminList[i];
+                    }
+                    delete[] AdminList;
+                    AdminList = temp;
+                    AdminSize *= 2;
+                }
+                AdminList[AdminIndex] = Admin(name, email, number);
+                for(int i = 0; i < ApprovalListIndex; i++){
+                    ApprovalList[i].display();
+                }
+                cout<< "Do you want to approve or reject ? Enter 1 or 2 for each respectively"<< endl;
+                cin>> approveChoice;
+                if(approveChoice == 1){
+                    AdminList[AdminIndex].approveCar(ApprovalList, &ApprovalListIndex, Database, &DatabaseIndex, &DatabaseSize);
+                }else{
+                    AdminList[AdminIndex].rejectCar(ApprovalList, &ApprovalListIndex, ApprovalListSize);
+                }
+                AdminIndex++;
+                break;
         }
+        cout<< "Do you want to Exit or Repeat ? Enter 0 or 1 for each respectively "<< endl;
+        cin>> repeat;
+    }
 }
